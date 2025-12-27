@@ -6,7 +6,6 @@
   
   [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://devsync-production-00b7.up.railway.app)
   [![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/iam-sarthakdev/DevSync)
-  [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
   
   *Code together, build together, succeed together*
   
