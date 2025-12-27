@@ -28,7 +28,7 @@ Use these exact settings:
 | **Build Command** | `npm install && npm run build` |
 | **Start Command** | `npm start` |
 
-> **Note:** Our `package.json` has a `start` script that runs `ts-node server.ts`, which is exactly what we need.
+> **Note:** Our `package.json` has a `start` script that runs `tsx server.ts`, which is exactly what we need.
 
 ### Step 4: Environment Variables
 Add these environment variables in the Render dashboard:
