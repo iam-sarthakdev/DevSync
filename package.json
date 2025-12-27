@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "ts-node server.ts",
+    "dev": "tsx server.ts",
     "build": "next build",
-    "start": "NODE_ENV=production ts-node server.ts",
+    "start": "NODE_ENV=production tsx server.ts",
     "lint": "next lint"
   },
   "dependencies": {
@@ -25,7 +25,10 @@
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -34,8 +37,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
-    "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "tailwindcss": "^4"
   }
 }
