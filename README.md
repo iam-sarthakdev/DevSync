@@ -4,7 +4,7 @@
   
   **Real-time Collaborative Code Editor with Integrated Development Environment**
   
-  [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://your-railway-url.up.railway.app)
+  [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://devsync-production-00b7.up.railway.app)
   [![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/iam-sarthakdev/DevSync)
   [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
   
@@ -62,7 +62,7 @@
 
 ## 🎥 Demo
 
-> **Live Demo**: [DevSync on Railway](https://your-railway-url.up.railway.app)
+> **Live Demo**: [DevSync on Railway](https://devsync-production-00b7.up.railway.app)
 
 ### How It Works
 1. **Create a Room** - Click "Create New Room" to start a collaborative session
