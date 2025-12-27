@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSocket } from '@/hooks/useSocket';
+import { useSocket } from '../hooks/useSocket';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Undo, Palette, Eraser, PenTool, Highlighter, Download, MousePointer2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 interface Point {
     x: number;

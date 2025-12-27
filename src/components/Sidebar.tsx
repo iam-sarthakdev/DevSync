@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, FileCode, Plus, Trash2, ChevronRight, ChevronDown, MessageSquare, Files, Folder, FolderOpen, FilePlus, FolderPlus, Download } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 

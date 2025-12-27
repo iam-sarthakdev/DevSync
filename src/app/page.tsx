@@ -9,7 +9,7 @@ import {
   GraduationCap, Briefcase, ChevronDown, Check, Sparkles,
   GitBranch, Terminal, Play, Share2, Command, Cpu
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 export default function Home() {
   const router = useRouter();

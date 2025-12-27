@@ -3,16 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import CodeEditor from '@/components/CodeEditor';
-import { useSocket } from '@/hooks/useSocket';
+import CodeEditor from '../../../components/CodeEditor';
+import { useSocket } from '../../../hooks/useSocket';
 import { Terminal, Play, Share2, Users, Loader2, Code2, Monitor, Box, Sparkles, Command, Sidebar as SidebarIcon, Moon, Sun, PenTool } from 'lucide-react';
-import { executeCode } from '@/lib/piston';
-import { cn } from '@/lib/utils';
-import Sidebar from '@/components/Sidebar';
-import LanguageSelector from '@/components/LanguageSelector';
-import ThemeSelector from '@/components/ThemeSelector';
-import Chat from '@/components/Chat';
-import Whiteboard from '@/components/Whiteboard';
+import { executeCode } from '../../../lib/piston';
+import { cn } from '../../../lib/utils';
+import Sidebar from '../../../components/Sidebar';
+import LanguageSelector from '../../../components/LanguageSelector';
+import ThemeSelector from '../../../components/ThemeSelector';
+import Chat from '../../../components/Chat';
+import Whiteboard from '../../../components/Whiteboard';
 
 export default function RoomPage() {
     const { roomId } = useParams();
