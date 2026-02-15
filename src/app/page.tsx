@@ -84,10 +84,8 @@ export default function Home() {
       <main className="flex-1">
         {/* HERO SECTION */}
         <section className="relative min-h-screen pt-32 pb-20 px-6 flex flex-col items-center justify-center overflow-hidden">
-          {/* Background FX - Improved Aurora */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/20 rounded-[100%] blur-[120px] opacity-40 animate-pulse pointer-events-none mix-blend-screen"></div>
-          <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-violet-600/10 rounded-[100%] blur-[120px] opacity-30 pointer-events-none"></div>
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04] mix-blend-overlay pointer-events-none"></div>
+          {/* Subtle background accent */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/10 rounded-[100%] blur-[120px] opacity-30 pointer-events-none"></div>
 
           <motion.div
             initial="initial"
@@ -106,7 +104,7 @@ export default function Home() {
 
             <motion.h1 variants={fadeInUp} className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.1]">
               Collaboration, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400">
+              <span className="text-indigo-400">
                 Synchronized.
               </span>
             </motion.h1>
@@ -119,13 +117,12 @@ export default function Home() {
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md mx-auto mb-20">
               <button
                 onClick={createRoom}
-                className="group relative w-full sm:w-auto h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)] flex items-center justify-center gap-2 overflow-hidden"
+                className="group relative w-full sm:w-auto h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <Zap className="w-4 h-4 fill-current" />
                   Start Coding Free
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
 
               <div className="flex w-full sm:w-auto relative">
@@ -202,7 +199,7 @@ export default function Home() {
                   <div className="text-zinc-500">9 &nbsp; {'}'}</div>
 
                   {/* Floating Elements */}
-                  <div className="absolute bottom-6 right-6 p-4 rounded-xl bg-zinc-900 border border-white/10 shadow-2xl max-w-xs animate-bounce delay-700">
+                  <div className="absolute bottom-6 right-6 p-4 rounded-xl bg-zinc-900 border border-white/10 shadow-lg max-w-xs">
                     <div className="flex gap-3 mb-2">
                       <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs font-bold">JD</div>
                       <div className="bg-white/5 rounded-lg p-2 text-xs text-zinc-300">
@@ -251,11 +248,10 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="group p-8 rounded-3xl bg-zinc-900/50 border border-white/5 hover:border-indigo-500/50 hover:bg-zinc-900/80 transition-all relative overflow-hidden"
+                  className="group p-8 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-indigo-500/30 transition-colors"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                    <feature.icon className="w-6 h-6 text-zinc-400 group-hover:text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6 transition-colors">
+                    <feature.icon className="w-6 h-6 text-zinc-400" />
                   </div>
                   <h3 className="text-xl font-bold mb-3 relative z-10">{feature.title}</h3>
                   <p className="text-zinc-400 leading-relaxed text-sm relative z-10">{feature.desc}</p>
@@ -291,8 +287,8 @@ export default function Home() {
               <div className="w-full md:w-1/2 relative">
                 {/* Abstract representation of connection */}
                 <div className="aspect-square relative flex items-center justify-center">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="relative z-10 bg-black/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
+                  <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-3xl"></div>
+                  <div className="relative z-10 bg-zinc-900 border border-white/10 p-8 rounded-2xl shadow-lg">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl">D</div>
                       <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
