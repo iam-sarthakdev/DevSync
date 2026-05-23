@@ -1,295 +1,195 @@
+<div align="center">
+
 # 🚀 DevSync
 
-<div align="center">
-  
-  **Real-time Collaborative Code Editor with Integrated Development Environment**
-  
-  [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://devsync-production-00b7.up.railway.app)
-  [![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/iam-sarthakdev/DevSync)
-  
-  *Code together, build together, succeed together*
-  
+**An Engineer-First Real-time Collaborative Code Editor & Development Environment**
+
+[![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://devsync-production-00b7.up.railway.app)
+[![GitHub](https://img.shields.io/badge/github-repo-blue?style=for-the-badge&logo=github)](https://github.com/iam-sarthakdev/DevSync)
+[![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+*High-performance web IDE with bi-directional real-time syncing, integrated execution engine, and built-in team communication.*
+
 </div>
 
 ---
-## 🚀 Interface Images 
+
+## 📌 Table of Contents
+- [System Architecture](#-system-architecture)
+- [End-to-End User & Data Flow](#-end-to-end-user--data-flow)
+- [Core Engineering Features](#-core-engineering-features)
+- [Deep Dive: Project Structure](#-deep-dive-project-structure)
+- [Local Setup & Deployment](#-local-setup--deployment)
+- [Visual Gallery](#-visual-gallery)
+
+---
+
+## 🏗️ System Architecture
+
+DevSync is built on a **Custom Next.js Server** architecture to natively support WebSockets alongside Next.js App Router for server-rendered UI. 
+
+```mermaid
+graph TD
+    Client[Client Browser]
+    
+    subgraph Frontend [Next.js App Router]
+        Monaco[Monaco Editor]
+        Whiteboard[Canvas API]
+        ChatUI[Chat Interface]
+        Sidebar[File Explorer]
+    end
+
+    subgraph Backend [Custom Node Server]
+        NextHandle[Next.js Request Handler]
+        SocketIO[Socket.IO Server]
+        RoomStore[(In-Memory Room State)]
+    end
+
+    subgraph External [External Services]
+        Piston[Piston Code Execution Engine]
+    end
+
+    Client -->|HTTP/Next.js| NextHandle
+    Client <-->|WebSocket| SocketIO
+    
+    Monaco <-->|Cursor/Code Sync| SocketIO
+    Whiteboard <-->|Draw Line Sync| SocketIO
+    ChatUI <-->|Message Event| SocketIO
+    
+    SocketIO <--> RoomStore
+    Monaco -->|Compile Request| Piston
+```
+
+### Architectural Decisions
+
+1. **Custom HTTP Server (`server.ts`)**: Instead of relying on standard serverless API routes (which cannot maintain stateful WebSocket connections), DevSync employs a custom HTTP server wrapping both `next/server` and `socket.io`.
+2. **In-Memory State Management**: For optimal real-time performance without database bottlenecks, session states (files, user lists, active cursors) are managed via an in-memory `Map` data structure on the Node server.
+3. **Piston API Integration**: Offloads the heavy lifting of secure, sandboxed code compilation/execution to the [Piston](https://github.com/engineer-man/piston) execution engine, preventing remote code execution (RCE) vulnerabilities on the primary server.
+
+---
+
+## 🔄 End-to-End User & Data Flow
+
+### 1. Room Creation & Hydration
+- User navigates to the landing page and clicks **Create Room**.
+- The client generates a unique `roomId` (via `nanoid`) and redirects to `/room/[roomId]`.
+- Upon mounting, `useSocket` establishes a persistent TCP connection to the Socket.IO server.
+- The server initializes an isolated namespace for the `roomId` inside the `rooms` Map.
+- **Hydration:** The server emits `sync-files` and `active-users` to the new client, seeding the initial Monaco editor state and file tree.
+
+### 2. Bi-Directional Event Broadcasting
+- **File Edits**: Typing in the Monaco Editor triggers `onChange`. The frontend emits a `code-change` event containing `{ roomId, fileName, code }`.
+- **Cursor Tracking**: Monaco's cursor observer fires `cursor-move`. The server broadcasts the exact `{ line, column }` alongside the user's generated hex color code to other clients.
+- **Whiteboard Engine**: Canvas `mousemove` events generate coordinate deltas `(prevPoint, currentPoint)` sent as `draw-line` events. The server performs fan-out broadcasting to render lines simultaneously on all peers.
+
+### 3. Code Execution
+- User selects a file and clicks the **Run** button.
+- The frontend packages the raw string content and the designated language.
+- A REST `POST` payload is dispatched to the Piston API.
+- Piston spins up an ephemeral Docker container, executes the code, and pipes `stdout`/`stderr` back to the client's terminal UI component.
+
+---
+
+## ⚡ Core Engineering Features
+
+### 🧩 Monaco Editor Integration
+Utilizing `@monaco-editor/react` to provide a VS Code-equivalent editing experience on the web. Features integrated:
+- Rich syntax highlighting and auto-completion.
+- Custom decorations injected dynamically for remote cursor rendering.
+- Virtualized DOM rendering for massive files.
+
+### 🔌 Socket.IO Event Infrastructure
+An intricate set of WebSockets events manages the entire collaborative lifecycle:
+- `join-room` / `disconnect`: Manages the ephemeral user session lifecycle and auto-purges zombies.
+- `selection-change`: Broadcasts text highlighting selections in real-time.
+- `create-file` / `delete-file`: Mutations to the virtual file tree are synced with optimistic UI updates.
+
+### 🎨 Fluid UI & Animation System
+Built with **Tailwind CSS v4** and **Framer Motion**:
+- Hardware-accelerated UI transitions.
+- Dynamic theme switching (VS Dark, VS Light, High Contrast) injected dynamically into Monaco and Tailwind context.
+
+---
+
+## 📁 Deep Dive: Project Structure
+
+```text
+devsync/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Landing page component
+│   │   ├── room/[roomId]/page.tsx# Core room engine (initializes socket)
+│   │   ├── layout.tsx            # Global metadata and providers
+│   │   └── globals.css           # Tailwind v4 injection
+│   ├── components/
+│   │   ├── CodeEditor.tsx        # Monaco wrapper with socket sync logic
+│   │   ├── Chat.tsx              # Real-time WebSocket chat layer
+│   │   ├── Whiteboard.tsx        # 2D Canvas context controller
+│   │   ├── Sidebar.tsx           # Virtual file tree state manager
+│   │   ├── LanguageSelector.tsx  # Piston API language parser mapping
+│   │   └── ThemeSelector.tsx     # Context-aware theme injector
+│   ├── hooks/
+│   │   └── useSocket.ts          # Singleton pattern for Socket.io-client
+│   └── lib/
+│       ├── utils.ts              # clsx + tailwind-merge utilities
+│       └── piston.ts             # Piston API execution wrapper
+├── server.ts                     # The Heart: Custom Node/Express/Socket server
+├── package.json                  # Dependencies (tsx, next, socket.io)
+└── tsconfig.json                 # Strict TypeScript configuration
+```
+
+---
+
+## 🛠️ Local Setup & Deployment
+
+### Prerequisites
+- Node.js `20.x+` (due to Next.js 14+ requirements)
+- Optional: Python/C++ compiler locally if attempting to self-host Piston, but by default, it relies on the public Piston API.
+
+### Development Environment
+
+```bash
+git clone https://github.com/iam-sarthakdev/DevSync.git
+cd DevSync
+
+# Install standard dependencies
+npm install
+
+# Run the custom server (DO NOT use 'next dev' directly)
+npm run dev
+# Under the hood, this runs: `tsx server.ts`
+```
+
+### Production Build
+Because of the custom server, standard Vercel deployments (which enforce serverless architecture) are not supported. DevSync must be deployed to a persistent container/VPS service like **Railway**, **Render**, or **AWS EC2**.
+
+```bash
+npm run build
+npm start # Runs NODE_ENV=production tsx server.ts
+```
+
+---
+
+## 📸 Visual Gallery
+
+### Application Interface
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8de7ac5c-0197-4370-8a6e-2747f14885b8" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7d259b08-6a71-4fee-aca1-faf9a0eb5bc1" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/84816052-9d90-468b-89c2-ae6e2c16c9f4" />
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/6e3c0d5d-3e82-4f6c-91ac-6da9e159501b" />
 
----
-## 🚀 Code Editor Images 
+### Code Editor in Action
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/da247eab-9449-47fa-b140-3ee2a64536b8" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b2fb5a6d-f753-41ff-b64d-4e4b8fa70166" />
-
----
-## ✨ Features
-
-### 🎯 Core Capabilities
-- **Real-time Code Collaboration** - Multiple developers can edit code simultaneously with live cursor tracking
-- **Integrated Code Execution** - Run code directly in the browser with support for JavaScript, Python, Java, and C++
-- **Live Chat** - Built-in messaging system for team communication
-- **Interactive Whiteboard** - Visual collaboration space for sketching ideas and diagrams
-- **File Management** - Create, organize, and manage project files and folders
-- **Theme Customization** - Multiple editor themes (VS Dark, VS Light, High Contrast)
-- **Language Support** - Syntax highlighting for all major programming languages
-
-### 🔥 Advanced Features
-- **Real-time Cursor Tracking** - See where your teammates are editing in real-time
-- **Code Syntax Highlighting** - Powered by Monaco Editor (VS Code's editor)
-- **Room-based Collaboration** - Create private rooms with unique sharable links
-- **Auto-save & Sync** - Changes are automatically synchronized across all users
-- **Download Projects** - Export your entire project as a ZIP file
-- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Next.js 16** - React framework with App Router
-- **React 19** - UI library
-- **TypeScript** - Type-safe development
-- **Tailwind CSS v4** - Utility-first CSS framework
-- **Framer Motion** - Smooth animations and transitions
-- **Monaco Editor** - VS Code's powerful code editor
-- **Lucide Icons** - Beautiful iconography
-
-### Backend
-- **Node.js 20+** - JavaScript runtime
-- **Socket.IO** - Real-time bidirectional communication
-- **Custom Next.js Server** - Express-like server with WebSocket support
-
-### Code Execution
-- **Piston API** - Secure code execution engine supporting 40+ languages
-
-### Deployment
-- **Railway** - Cloud platform for deployment
-- **GitHub Actions** - CI/CD pipeline
-
----
-
-## 🎥 Demo
-
-> **Live Demo**: [DevSync on Railway](https://devsync-production-00b7.up.railway.app)
-
-### How It Works
-1. **Create a Room** - Click "Create New Room" to start a collaborative session
-2. **Share the Link** - Copy the room URL and share it with your team
-3. **Start Coding** - Write code together in real-time
-4. **Execute & Test** - Run your code directly in the browser
-5. **Communicate** - Use the integrated chat and whiteboard
-
----
-
-## 📦 Installation
-
-### Prerequisites
-- **Node.js** 20.x or higher
-- **npm** or **yarn** or **pnpm**
-- **Git**
-
-### Local Development
-
-```bash
-# Clone the repository
-git clone https://github.com/iam-sarthakdev/DevSync.git
-
-# Navigate to the project directory
-cd DevSync
-
-# Install dependencies
-npm install
-
-# Run the development server
-npm run dev
-
-# Open http://localhost:3000 in your browser
-```
-
-### Build for Production
-
-```bash
-# Create optimized production build
-npm run build
-
-# Start production server
-npm start
-```
-
----
-
-## 🚀 Deployment
-
-### Deploy to Railway (Recommended)
-
-1. **Sign up** at [railway.app](https://railway.app/)
-2. **Connect GitHub** and authorize Railway
-3. **Create New Project** → **Deploy from GitHub repo**
-4. **Select** `iam-sarthakdev/DevSync`
-5. **Deploy** - Railway auto-configures everything!
-
-**Your app will be live in ~2 minutes** ✨
-
-For detailed instructions, see [RAILWAY.md](RAILWAY.md)
-
-### Environment Variables
-
-No environment variables required! The app works out of the box.
-
-Optional configurations:
-```env
-NODE_ENV=production
-PORT=3000
-```
-
----
-
-## 📖 Usage
-
-### Creating a Room
-1. Open the application homepage
-2. Click **"Create New Room"**
-3. You'll be redirected to a unique room with a shareable URL
-
-### Joining a Room
-1. Open the room URL shared by a teammate
-2. Enter your username
-3. Start collaborating immediately
-
-### Features Guide
-
-#### Code Editor
-- **Write Code** - Full syntax highlighting and autocomplete
-- **Select Language** - Choose from JavaScript, Python, Java, C++
-- **Choose Theme** - Switch between VS Dark, VS Light, or High Contrast
-- **Run Code** - Click the ▶️ play button to execute
-
-#### File Management
-- **Create Files** - Click the "+" icon next to Files
-- **Create Folders** - Click the folder icon
-- **Organize** - Drag and drop files into folders
-- **Delete** - Right-click → Delete
-- **Download** - Export entire project as ZIP
-
-#### Chat
-- Real-time messaging with all room participants
-- See who sent each message
-- Auto-scroll to latest messages
-
-#### Whiteboard
-- **Draw** - Freehand drawing tool
-- **Highlight** - Semi-transparent highlighter
-- **Erase** - Remove unwanted marks
-- **Colors** - Multiple color options
-- **Clear** - Reset the entire board
-- **Download** - Save whiteboard as PNG image
-
----
-
-## 🏗️ Project Structure
-
-```
-devsync/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx              # Homepage
-│   │   ├── room/[roomId]/
-│   │   │   └── page.tsx          # Collaboration room
-│   │   ├── layout.tsx            # Root layout
-│   │   └── globals.css           # Global styles
-│   ├── components/
-│   │   ├── CodeEditor.tsx        # Monaco editor wrapper
-│   │   ├── Chat.tsx              # Chat component
-│   │   ├── Whiteboard.tsx        # Drawing canvas
-│   │   ├── Sidebar.tsx           # File explorer
-│   │   ├── LanguageSelector.tsx  # Language picker
-│   │   └── ThemeSelector.tsx     # Theme switcher
-│   ├── hooks/
-│   │   └── useSocket.ts          # Socket.IO hook
-│   └── lib/
-│       ├── utils.ts              # Utility functions
-│       └── piston.ts             # Code execution API
-├── server.ts                     # Custom Next.js server
-├── tsconfig.json                 # TypeScript config
-└── package.json                  # Dependencies
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
-### Development Guidelines
-- Follow the existing code style
-- Write meaningful commit messages
-- Test your changes thoroughly
-- Update documentation as needed
-
----
-
-## 🐛 Known Issues & Roadmap
-
-### Known Issues
-- Large file uploads may be slow (working on optimization)
-- Mobile keyboard may overlap editor on some devices
-
-### Roadmap
-- [ ] User authentication (GitHub OAuth)
-- [ ] Persistent room storage (MongoDB/PostgreSQL)
-- [ ] Video/voice chat integration
-- [ ] Git integration
-- [ ] AI code suggestions
-- [ ] More programming languages
-- [ ] Custom themes
-- [ ] File version history
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 👨‍💻 Author
 
 **Sarthak Dev**
-
 - GitHub: [@iam-sarthakdev](https://github.com/iam-sarthakdev)
-- LinkedIn: [Your LinkedIn Profile](https://www.linkedin.com/in/sarthak-kanoi-b49475362/)
-- Portfolio: [Your Website](https://personal-portfolio-lake-nu-22.vercel.app/)
+- LinkedIn: [Sarthak Kanoi](https://www.linkedin.com/in/sarthak-kanoi-b49475362/)
 
----
-
-## 🙏 Acknowledgments
-
-- **Monaco Editor** - The amazing code editor from VS Code
-- **Socket.IO** - Real-time engine
-- **Piston API** - Code execution service
-- **Railway** - Deployment platform
-- **Next.js Team** - For the incredible framework
-
----
-
-## ⭐ Show Your Support
-
-If you found this project helpful, please give it a ⭐️ on GitHub!
-
----
-
-<div align="center">
-  
-  **Made with ❤️ by Sarthak Dev**
-  
-  [Report Bug](https://github.com/iam-sarthakdev/DevSync/issues) · [Request Feature](https://github.com/iam-sarthakdev/DevSync/issues)
-  
-</div>
+*Made with ❤️ by Sarthak Dev*
